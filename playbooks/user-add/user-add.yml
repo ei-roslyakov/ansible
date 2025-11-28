@@ -1,0 +1,103 @@
+---
+- name: Create and manage users from list
+  hosts: all
+  become: true
+  vars:
+    users: []
+
+  pre_tasks:
+    - name: Validate users list is defined
+      ansible.builtin.assert:
+        that:
+          - users is defined
+          - users | length > 0
+        fail_msg: "No users defined. Please provide users list via -e @users-list.yml"
+        success_msg: "Found {{ users | length }} user(s) to process"
+
+  tasks:
+    - name: Ensure required groups exist for all users
+      ansible.builtin.group:
+        name: "{{ item.1 }}"
+        state: present
+      loop: "{{ users | subelements('groups', skip_missing=True) }}"
+      when: users | length > 0
+
+    - name: Create user accounts
+      ansible.builtin.user:
+        name: "{{ item.username }}"
+        comment: "{{ item.comment | default('Managed by Ansible') }}"
+        shell: "{{ item.shell | default('/bin/bash') }}"
+        groups: "{{ item.groups | default([]) | join(',') if item.groups is defined and item.groups else omit }}"
+        append: true
+        create_home: true
+        state: "{{ item.state | default('present') }}"
+        password: "{{ item.password | default(omit) }}"
+        uid: "{{ item.uid | default(omit) }}"
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      register: user_results
+
+    - name: Remove sudoers file for users being removed
+      ansible.builtin.file:
+        path: "/etc/sudoers.d/{{ item.username }}"
+        state: absent
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      when:
+        - item.state | default('present') == 'absent'
+
+    - name: Configure sudo access for users
+      ansible.builtin.lineinfile:
+        path: "/etc/sudoers.d/{{ item.username }}"
+        line: "{{ item.username }} ALL=(ALL) {{ 'NOPASSWD:' if item.sudo_nopasswd | default(true) else '' }}ALL"
+        create: true
+        mode: "0440"
+        validate: "visudo -cf %s"
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      when:
+        - item.sudo | default(false) | bool
+        - item.state | default('present') == 'present'
+
+    - name: Ensure .ssh directory exists
+      ansible.builtin.file:
+        path: "/home/{{ item.username }}/.ssh"
+        state: directory
+        owner: "{{ item.username }}"
+        group: "{{ item.username }}"
+        mode: "0700"
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      when:
+        - item.state | default('present') == 'present'
+        - item.ssh_key is defined
+
+    - name: Configure SSH public keys
+      ansible.posix.authorized_key:
+        user: "{{ item.username }}"
+        key: "{{ item.ssh_key }}"
+        state: present
+        exclusive: false
+      loop: "{{ users }}"
+      loop_control:
+        label: "{{ item.username }}"
+      when:
+        - item.state | default('present') == 'present'
+        - item.ssh_key is defined
+
+  post_tasks:
+    - name: Display summary
+      ansible.builtin.debug:
+        msg:
+          - "============================================"
+          - "User Management Summary for {{ inventory_hostname }}"
+          - "============================================"
+          - "Total users processed: {{ users | length }}"
+          - "Users with sudo access: {{ users | selectattr('sudo', 'defined') | selectattr('sudo', 'equalto', true) | list | length }}"
+          - "Users with SSH keys: {{ users | selectattr('ssh_key', 'defined') | list | length }}"
+          - "============================================"
+          - "============================================"

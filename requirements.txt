@@ -1,0 +1,3 @@
+# Ansible and core dependencies
+ansible-core==2.20.0
+yamllint==1.37.1

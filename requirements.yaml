@@ -1,0 +1,9 @@
+---
+collections:
+  # Core POSIX utilities (authorized_key, mount, sysctl, etc.)
+  - name: ansible.posix
+    version: ">=2.0.0"
+
+  # Common modules (git, npm, pip, docker, etc.)
+  - name: community.general
+    version: ">=12.0.0"

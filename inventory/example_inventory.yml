@@ -1,0 +1,50 @@
+---
+# Example Ansible Inventory (YAML format)
+# Infrastructure setup with Kubernetes, Docker, NFS, and development hosts
+
+all:
+  children:
+    # General purpose machines
+    gmk:
+      hosts:
+        gmk64:
+          ansible_host: 192.168.1.200
+        gmk16:
+          ansible_host: 192.168.1.201
+
+    # Kubernetes cluster nodes
+    k8s-nodes:
+      hosts:
+        k8s-master-01:
+          ansible_host: 192.168.1.209
+        k8s-node-01:
+          ansible_host: 192.168.1.210
+        rpi-node-01:
+          ansible_host: 192.168.1.28
+          ansible_user: yevhenii
+      vars:
+        ansible_user: ubuntu
+        ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+
+    # NFS storage servers
+    nfs-nodes:
+      hosts:
+        nfs:
+          ansible_host: 192.168.1.220
+      vars:
+        ansible_user: ubuntu
+        ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+
+    # Docker standalone hosts
+    docker-host:
+      hosts:
+        docker-host:
+          ansible_host: 192.168.1.150
+      vars:
+        ansible_user: ubuntu
+        ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+
+  vars:
+    # Global variables for all hosts
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
+    ansible_python_interpreter: /usr/bin/python3

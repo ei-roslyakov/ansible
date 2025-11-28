@@ -1,0 +1,11 @@
+---
+# users_list.yml - Define multiple users to create
+
+users:
+  - username: deploy
+    comment: "Deployment User"
+    shell: /bin/bash
+    groups: []
+    sudo: true
+    sudo_nopasswd: true
+    ssh_key: "ssh-ed25519 ..."

@@ -1,0 +1,100 @@
+# Ansible specific files
+.ansible/
+*.retry
+*.log
+*.tmp
+ansible.cfg.bak
+*.pyc
+__pycache__/
+*.pyo
+
+# Ansible Galaxy
+roles/*/
+!roles/requirements.yml
+collections/
+galaxy.yml
+
+# Inventory files (keep templates/examples)
+inventory/*
+host_vars/*
+group_vars/*
+!inventory/sample_inventory*
+!inventory/example_inventory*
+!host_vars/sample_host*
+!group_vars/sample_group*
+
+# Vault files and secrets
+vault_pass*
+.vault_pass*
+*vault*.yml
+!*vault*.yml.example
+secrets/
+*.secret
+*.secrets
+
+# SSL/TLS certificates and keys
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+*.pub
+.ssh/
+ssl/
+certs/
+
+# Logs and temporary files
+logs/
+*.log
+*.log.*
+*.out
+*.err
+tmp/
+temp/
+
+# Python virtual environments
+.venv/
+venv/
+env/
+.env
+.python-version
+pip-log.txt
+
+# Package managers
+requirements.txt.lock
+Pipfile.lock
+poetry.lock
+
+# System and OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Editor and IDE files
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*.swo
+.vim/
+*.sublime-*
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# Test and coverage files
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+.hypothesis/
