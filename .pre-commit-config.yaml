@@ -18,7 +18,9 @@ repos:
         files: \.(yml|yaml)$
         exclude: ^\.github/
         additional_dependencies:
-          - ansible-core>=2.12
+          # Full ansible package (not ansible-core) so bundled collections
+          # (ansible.posix, community.general) resolve during lint syntax-check
+          - ansible>=9.0.0
 
   # Python code formatting
   - repo: https://github.com/psf/black
